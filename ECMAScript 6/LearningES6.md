@@ -581,8 +581,467 @@ name属性
 
 双冒号运算符
 
+- 函数绑定运算符是并排的两个冒号（::），双冒号左边是一个对象，右边是一个函数。 
+- “函数绑定”（function bind）运算符，用来取代call、apply、bind调用。 
+- 该运算符会自动将左边的对象，作为上下文环境（即this对象），绑定到右边的函数上面。 
+- 如果双冒号左边为空，右边是一个对象的方法，则等于将该方法绑定在该对象上面。
+      let log = ::console.log;
+      // 等同于
+      var log = console.log.bind(console); 
+      
+- 如果双冒号运算符的运算结果，还是一个对象，就可以采用链式写法。 
+
 尾调用优化
 
+- 指某个函数的最后一步是调用另一个函数。
+- return f(x)格式   其它格式均不是尾调用-----调用之后不能有赋值操作
+- 尾调用不一定出现在函数尾部，只要是最后一步操作即可。 
+      function f(x) {
+        if (x > 0) {
+          return m(x)
+        }
+        return n(x);
+      }  //m,n都属于尾调用
+      
+- 栈帧介绍
+- 如果函数g不是尾调用，函数f就需要保存内部变量m和n的值、g的调用位置等信息。但由于调用g之后，函数f就结束了，所以执行到最后一步，完全可以删除f(x)的调用帧，只保留g(3)的调用帧。
+  这就叫做“尾调用优化”（Tail call optimization），即只保留内层函数的调用帧。如果所有函数都是尾调用，那么完全可以做到每次执行时，调用帧只有一项，这将大大节省内存。这就是“尾调用优化”的意义。
+- 尾递归------函数调用自身，称为递归。如果尾调用自身，就称为尾递归。 
+  - 递归非常耗费内存，因为需要同时保存成千上百个调用帧，很容易发生“栈溢出”错误（stack overflow）。 
+  - 但对于尾递归来说，由于只存在一个调用帧，所以永远不会发生“栈溢出”错误。 
+  - S6 是如此，第一次明确规定，所有 ECMAScript 的实现，都必须部署“尾调用优化”。这就是说，ES6 中只要使用尾递归，就不会发生栈溢出，相对节省内存。 
+  - 斐波那契数列
+- 递归函数的改写
+  - 函数式编程有一个概念，叫做柯里化（currying），意思是将多参数的函数转换成单参数的形式 
+  - 方法一是在尾递归函数之外，再提供一个正常形式的函数。 
+  - 方法二采用 ES6 的函数默认值。 
+  - 递归本质上是一种循环操作。纯粹的函数式编程语言没有循环操作命令，所有的循环都用递归实现，这就是为什么尾递归对这些语言极其重要。 
+- 严格模式
+  - ES6 的尾调用优化只在严格模式下开启，正常模式是无效的。这是因为在正常模式下，函数内部有两个变量，可以跟踪函数的调用栈。
+    - func.arguments：返回调用时函数的参数。
+    - func.caller：返回调用当前函数的那个函数。
+    - 尾调用优化发生时，函数的调用栈会改写，因此上面两个变量就会失真。 
+- 尾递归优化的实现
+  - 采用“循环”换掉“递归”。 
+  - 蹦床函数（trampoline）可以将递归执行转为循环执行 
+
 函数参数的尾逗号
+
+- ES2017 允许函数的最后一个参数有尾逗号 
+
+
+
+数组的扩展
+
+扩展运算符
+
+基本用法
+
+- 扩展运算符（spread）是三个点（...）。它好比 rest 参数的逆运算，将一个数组转为用逗号分隔的参数序列。 
+- 由于扩展运算符可以展开数组，所以不再需要apply方法，将数组转为函数的参数了。 
+      // ES5 的写法
+      Math.max.apply(null, [14, 3, 77])
+      
+      // ES6 的写法
+      Math.max(...[14, 3, 77])
+      
+      // ES5的 写法
+      var arr1 = [0, 1, 2];
+      var arr2 = [3, 4, 5];
+      Array.prototype.push.apply(arr1, arr2);
+      
+      // ES6 的写法
+      let arr1 = [0, 1, 2];
+      let arr2 = [3, 4, 5];
+      arr1.push(...arr2);
+
+运用
+
+- 复制数组----------不是复制引用
+      const a1 = [1, 2];
+      // 写法一
+      const a2 = [...a1];
+      // 写法二
+      const [...a2] = a1;
+- 合并数组--------------都是浅拷贝
+      const a1 = [{ foo: 1 }];
+      const a2 = [{ bar: 2 }];
+      
+      const a3 = a1.concat(a2);
+      const a4 = [...a1, ...a2];
+      
+      a3[0] === a1[0] // true
+      a4[0] === a1[0] // true
+- 与结构赋值结合
+  - 如果将扩展运算符用于数组赋值，只能放在参数的最后一位，否则会报错。 
+        const [first, ...middle, last] = [1, 2, 3, 4, 5];
+        // 报错
+        
+- 字符串
+  - 扩展运算符还可以将字符串转为真正的数组。 
+        [...'hello']
+        // [ "h", "e", "l", "l", "o" ]
+        
+  - 上面写法有一个重要的好处，那就是能够正确识别四个字节的 Unicode 字符。 
+- 实现了Iterator接口的对象
+  - 任何Iterator接口的对象，都可以用扩展运算符转为真正的数组
+- Map和Set结构，Generator函数
+  - 扩展运算符内部调用的是数据结构的 Iterator 接口，因此只要具有 Iterator 接口的对象，都可以使用扩展运算符，比如 Map 结构。
+  - 如果对没有 Iterator 接口的对象，使用扩展运算符，将会报错 
+
+Array.from()
+
+- Array.from方法用于将两类对象转为真正的数组：类似数组的对象（array-like object）和可遍历（iterable）的对象（包括 ES6 新增的数据结构 Set 和 Map） 
+      let arrayLike = {
+          '0': 'a',
+          '1': 'b',
+          '2': 'c',
+          length: 3    //必须要有length属性，不然最终得到的结果均为[]
+      };
+      
+      // ES5的写法
+      var arr1 = [].slice.call(arrayLike); // ['a', 'b', 'c']
+      
+      // ES6的写法
+      let arr2 = Array.from(arrayLike); // ['a', 'b', 'c']
+- 常见的类似数组的对象是 DOM 操作返回的 NodeList 集合，以及函数内部的arguments对象 
+- 所谓类似数组的对象，本质特征只有一点，即必须有length属性。因此，任何有length属性的对象，都可以通过Array.from方法转为数组，而此时扩展运算符就无法转换。 
+- Array.from还可以接受第二个参数，作用类似于数组的map方法，用来对每个元素进行处理，将处理后的值放入返回的数组。 
+- 对于还没有部署该方法的浏览器，可以用Array.prototype.slice方法替代。 
+
+Array.of()
+
+- Array.of方法用于将一组值，转换为数组。 
+- 这个方法的主要目的，是弥补数组构造函数Array()的不足。因为参数个数的不同，会导致Array()的行为有差异。 
+
+数组实例的copyWithin()
+
+- 在当前数组内部，将指定位置的成员复制到其他位置（会覆盖原有成员），然后返回当前数组。 
+      Array.prototype.copyWithin(target, start = 0, end = this.length)
+  - target（必需）：从该位置开始替换数据。如果为负值，表示倒数。
+  - start（可选）：从该位置开始读取数据，默认为 0。如果为负值，表示倒数。
+  - end（可选）：到该位置前停止读取数据，默认等于数组长度。如果为负值，表示倒数。
+
+数组实例的find()和findIndex()
+
+find()
+
+- 用于找出第一个符合条件的数组成员 
+- 它的参数是一个回调函数，所有数组成员依次执行该回调函数，直到找出第一个返回值为true的成员，然后返回该成员 
+- 如果没有符合条件的成员，则返回undefined 
+
+findIndex()
+
+- findIndex方法的用法与find方法非常类似，返回第一个符合条件的数组成员的位置，如果所有成员都不符合条件，则返回-1 
+- 这两个函数都可以接受第二个参数，用来绑定回调函数的this对象（第一个参数为回调函数）
+- 这两个方法都可以发现NaN，弥补了数组的indexOf方法的不足。
+      [NaN].indexOf(NaN)
+      // -1
+      
+      [NaN].findIndex(y => Object.is(NaN, y))
+      // 0
+
+数组实例的fill()
+
+- fill方法使用给定值，填充一个数组。 
+- 可以接受第二个和第三个参数，用于指定填充的起始位置和结束位置。（在结束位置之前）
+      ['a', 'b', 'c'].fill(7, 1, 2)
+      // ['a', 7, 'c']    注意是在结束位置2之前！！
+- 注意，如果填充的类型为对象，那么被赋值的是同一个内存地址的对象，而不是深拷贝对象。 
+      let arr = new Array(3).fill([]);
+      arr[0].push(5);
+      arr
+      // [[5], [5], [5]]
+
+数组实例的entries(),keys(),values()
+
+- keys()是对键名的遍历、values()是对键值的遍历，entries()是对键值对的遍历。 
+      for (let [index, elem] of ['a', 'b'].entries()) {
+        console.log(index, elem);
+      }
+      // 0 "a"
+      // 1 "b"
+
+数组实例的includes()
+
+- includes方法返回一个布尔值，表示某个数组是否包含给定的值
+- 该方法的第二个参数表示搜索的起始位置，默认为0。如果第二个参数为负数，则表示倒数的位置，如果这时它大于数组长度，则会重置为从0开始。 
+- indexOf缺点
+  - 一是不够语义化，它的含义是找到参数值的第一个出现位置，所以要去比较是否不等于-1，表达起来不够直观 
+  - 它内部使用严格相等运算符（===）进行判断，这会导致对NaN的误判。 
+- Map 结构的has方法，是用来查找键名的 
+- Set 结构的has方法，是用来查找值的 
+
+数组的空位
+
+- 数组的空位指，数组的某一个位置没有任何值 
+- **注意，空位不是undefined，一个位置的值等于undefined，依然是有值的。
+- es5
+  -  forEach(), filter(), reduce(), every() 和some()都会跳过空位。
+  - map()会跳过空位，但会保留这个值
+  - join()和toString()会将空位视为undefined，而undefined和null会被处理成空字符串。
+- ES6 则是明确将空位转为undefined。 
+
+
+
+对象的扩展
+
+ 属性的简洁表示法
+
+ES6 允许直接写入变量和函数，作为对象的属性和方法 
+
+- 属性简写（属性名即为变量名）
+
+    const foo = 'bar';
+    const baz = {foo};
+    baz // {foo: "bar"}
+    
+    // 等同于
+    const baz = {foo: foo};
+
+- 方法简写
+
+    const o = {
+      method() {
+        return "Hello!";
+      }
+    };
+    // 等同于
+    const o = {
+      method: function() {
+        return "Hello!";
+      }
+    };
+
+- 注意，简洁写法的属性名总是字符串，这会导致一些看上去比较奇怪的结果。 
+      const obj = {
+        class () {} //由于class是字符串，，所以不会因为它属于关键字，而导致语法解析报错
+      };
+      
+      // 等同于
+      
+      var obj = {
+        'class': function() {}
+      };
+- 如果某个方法的值是一个 Generator 函数，前面需要加上星号 
+
+ 属性名表达式
+
+- ES6 允许字面量定义对象时，用中括号包含（表达式）作为对象的属性名或者方法名，即把表达式放在方括号内。 
+      let lastWord = 'last word';
+      
+      const a = {
+        'first word': 'hello',
+        [lastWord]: 'world'
+      };
+      
+      a['first word'] // "hello"
+      a[lastWord] // "world"
+      a['last word'] // "world"
+      
+      let obj = {
+        ['h' + 'ello']() {
+          return 'hi';
+        }
+      };
+      
+      obj.hello() // hi
+  - 属性名表达式与简洁表示法，不能同时使用，会报错。 
+  - 属性名表达式如果是一个对象，默认情况下会自动将对象转为字符串[object Object] 
+  - 若有相同的属性名，则后面的属性名会覆盖前面的（前面的无效）
+
+ 方法的name属性
+
+- 方法的name属性返回函数名（即方法名） 
+- 如果对象的方法使用了取值函数（getter）和存值函数（setter） ，返回值是方法名前加上get和set。 
+- bind方法创造的函数，name属性返回bound加上原函数的名字 
+- function构造函数创造的函数，name属性返回anonymous。 
+- 如果对象的方法是一个 Symbol 值，那么name属性返回的是这个 Symbol 值的描述。 
+
+ Object.is()
+
+- Object.is()用来比较两个值是否严格相等，与严格比较运算符（===）的行为基本一致。 
+  - 不同之处只有两个：一是+0不等于-0，二是NaN等于自身。 
+
+ Object.assign()
+
+- Object.assign方法用于对象的合并，将源对象（source）的所有可枚举属性，复制到目标对象（target） 
+- 如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性。 
+- 由于undefined和null无法转成对象，所以如果它们作为参数，就会报错 
+- 数组，字符串，属性名为Symbol值，都可以拷贝，而其它的不能被拷贝进去
+- 注意点
+  - 浅拷贝
+  - 同名属性的替换，后者覆盖前者
+  - 数组的处理：把数组视为对象，索引即为属性名
+  - 取值函数的处理：如果要赋值的是一个取值函数，那么将求值后再赋值
+
+ 属性的可枚举性和遍历
+
+- 对象的每个属性都有一个描述对象（Descriptor），用来控制该属性的行为 
+- Object.getOwnPropertyDescriptor方法可以获取该属性的描述对象。 
+- 目前，有四个操作会忽略enumerable为false的属性。 
+  - for...in循环：只遍历对象自身的和继承的可枚举的属性。
+  - Object.keys()：返回对象自身的所有可枚举的属性的键名。
+  - JSON.stringify()：只串行化对象自身的可枚举的属性。
+  - Object.assign()： 忽略enumerable为false的属性，只拷贝对象自身的可枚举的属性
+- ES6 规定，所有 Class 的原型的方法都是不可枚举的。 
+- 属性遍历的次序规则。
+  - 首先遍历所有数值键，按照数值升序排列。
+  - 其次遍历所有字符串键，按照加入时间升序排列。
+  - 最后遍历所有 Symbol 键，按照加入时间升序排列
+
+ Object.getOwnPropertyDescriptors()
+
+- ES2017 引入了Object.getOwnPropertyDescriptors方法，返回指定对象所有自身属性（非继承属性）的描述对象。 
+- 目的：该方法的引入目的，主要是为了解决Object.assign()无法正确拷贝get属性和set属性的问题。 
+
+ __proto__属性，Object.setPrototypeOf(),Object.getPrototypeOf()
+
+- 最好不要使用__proto__属性
+- Object.create()（生成操作）代替。 
+- Object.setPrototypeOf(object, prototype)方法的作用与__proto__相同，用来设置一个对象的prototype对象，返回参数对象本身。它是 ES6 正式推荐的设置原型对象的方法。 
+- Object.getPrototypeOf(object)用于读取一个对象的原型对象 
+- 如果参数不是对象，会被自动转为对象 
+- 如果参数是undefined或null，它们无法转为对象，所以会报错。 
+
+ super关键字
+
+- ES6 新增了一个类似this的关键字super，指向当前对象的原型对象。 
+- super关键字表示原型对象时，只能用在对象的方法之中，用在其他地方都会报错。 
+- 目前，只有对象方法的简写法可以让 JavaScript 引擎确认，定义的是对象的方法。 
+      const obj = {
+        x: 'world',
+        foo() {
+          super.foo();
+        }
+      }
+
+ Object.keys()/values()/entries()
+
+- Object.keys方法，返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名 
+- Object.values方法返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值。 
+  - 属性名为数值的属性，是按照数值大小，从小到大遍历的， 
+  - 如果Object.values方法的参数是一个字符串，会返回各个字符组成的一个数组。 
+  - 如果原对象的属性名是一个 Symbol 值，该属性会被忽略。 
+
+ 对象的扩展运算符
+
+- ES2018 将这个运算符(...)了对象。 
+
+
+
+Symbol
+
+概述
+
+- ES6 引入了一种新的原始数据类型Symbol，表示独一无二的值 ，以保证对象属性不会与其他属性名产生冲突 
+- 它是 JavaScript 语言的第七种数据类型 
+- Symbol 值通过Symbol函数生成 
+- Symbol 值不能与其他类型的值进行运算，会报错。 
+- 但是，Symbol 值可以显式转为字符串 ，Symbol 值也可以转为布尔值，但是不能转为数值。 
+- 注意，Symbol 值作为对象属性名时，不能用点运算符。 
+- Symbol 值作为属性名时，该属性还是公开属性，不是私有属性。 
+
+实例：消除魔术字符串
+
+- 魔术字符串指的是，在代码之中多次出现、与代码形成强耦合的某一个具体的字符串或者数值。 
+
+属性名的遍历
+
+- Symbol 作为属性名，该属性不会出现在for...in、for...of循环中，也不会被Object.keys()、Object.getOwnPropertyNames()、JSON.stringify()返回。 
+- Object.getOwnPropertySymbols方法返回一个数组，成员是当前对象的所有用作属性名的 Symbol 值 
+- Reflect.ownKeys方法可以返回所有类型的键名，包括常规键名和 Symbol 键名。 
+
+Symbol.for(),Symbol.keyFor()
+
+- Symbol.for()与Symbol()这两种写法，都会生成新的 Symbol。它们的区别是，前者会被   登记   在   全局环境    中供搜索，后者不会。 Symbol.for('foo') === Symbol.for('foo');  //true
+- Symbol.keyFor方法返回一个已登记的 Symbol 类型值的key。 
+      let s1 = Symbol.for("foo");
+      Symbol.keyFor(s1) // "foo"
+      
+      let s2 = Symbol("foo");
+      Symbol.keyFor(s2) // undefined
+
+实例：模块的Singleton模式
+
+- Singleton 模式指的是调用一个类，任何时候返回的都是同一个实例。 
+
+内置的Symbol值
+
+
+
+
+
+Set 和 Map数据结构
+
+Set
+
+基本用法
+
+- ES6 提供了新的数据结构 Set。它类似于数组，但是成员的值都是唯一的，没有重复的值 ， Set 结构不会添加重复的值 
+- Set 结构没有键名，只有键值（或者说键名和键值是同一个值） 
+- 可以接收数组作为参数（或者具有iterable接口的其它数据结构）  （返回的是一个对象）
+- Set 本身是一个构造函数，用来生成 Set 数据结构。
+- 数组去重
+      [...new Set(array)]
+- 向 Set 加入值的时候，不会发生类型转换，所以5和"5"是两个不同的值 ,内部相当于有===的判断，但是有个例外就是NaN等于自身   ---两个对象总是不相等的。 
+
+Set实例的属性和方法
+
+- 属性
+  - Set.prototype.constructor：构造函数，默认就是Set函数。
+  - Set.prototype.size：返回Set实例的成员总数
+- 操作方法
+  - add(value)：添加某个值，返回 Set 结构本身。
+  - delete(value)：删除某个值，返回一个布尔值，表示删除是否成功。
+  - has(value)：返回一个布尔值，表示该值是否为Set的成员。
+  - clear()：清除所有成员，没有返回值。
+- 遍历方法
+  - keys()：返回键名的遍历器
+  - values()：返回键值的遍历器-----与上面方法完全一致，结果也一样 （为set结构的默认方法，可省略）
+  - entries()：返回键值对的遍历器 --------返回的结果是键值和键名完全相同的单个单个的数组
+  - forEach()：使用回调函数遍历每个成员----------无返回值
+- 遍历的应用
+  - 扩展运算符内部使用for...of循环，所以也可以用于Set结构
+  - Set 可以很容易地实现并集（Union）、交集（Intersect）和差集（Difference）。 
+        let a = new Set([1, 2, 3]);
+        let b = new Set([4, 3, 2]);
+        
+        // 并集
+        let union = new Set([...a, ...b]);
+        // Set {1, 2, 3, 4}
+        
+        // 交集
+        let intersect = new Set([...a].filter(x => b.has(x)));
+        // set {2, 3}
+        
+        // 差集
+        let difference = new Set([...a].filter(x => !b.has(x)));
+        // Set {1}
+
+WeakSet
+
+- 与Set结构的区别
+  - WeakSet的成员只能是对象，而不是其他类型的值
+  - WeakSet 中的对象都是弱引用，即垃圾回收机制不考虑 WeakSet 对该对象的引用 ：WeakSet 适合临时存放一组对象，以及存放跟对象绑定的信息。只要这些对象在外部消失，它在 WeakSet 里面的引用就会自动消失。 
+        const a = [[1, 2], [3, 4]];
+        const ws = new WeakSet(a);
+        // WeakSet {[1, 2], [3, 4]}    是数组a的成员成为ws的成员，而不是a数组本身
+  - WeakSet.prototype.add(value)：向 WeakSet 实例添加一个新成员。
+  - WeakSet.prototype.delete(value)：清除 WeakSet 实例的指定成员。
+  - WeakSet.prototype.has(value)：返回一个布尔值，表示某个值是否在 WeakSet 实例之中。
+  - WeakSet 没有size属性，没有办法遍历它的成员。 
+  - WeakSet 不能遍历，是因为成员都是弱引用，随时可能消失，遍历机制无法保证成员的存在，很可能刚刚遍历结束，成员就取不到了。WeakSet 的一个用处，是储存 DOM 节点，而不用担心这些节点从文档移除时，会引发内存泄漏。 
+
+Map
+
+基本用法
+
+- ES6 提供了 Map 数据结构。它类似于对象，也是键值对的集合，但是“键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键 
+
+WeakMap
+
+
+
 
 
