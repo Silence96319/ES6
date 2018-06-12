@@ -1,4 +1,3 @@
-
 《ECMAScript 6 入门》
 
 简介
@@ -17,7 +16,7 @@ Babel转码器
 - Babel 是一个广泛使用的 ES6 转码器，可以将 ES6 代码转为 ES5 代码，从而在现有环境执行 
   
 
- let和const
+let和const
 
 let命令
 
@@ -44,8 +43,8 @@ for循环计数器
 
 不存在变量提升
 
-    console.log(bar); // 报错ReferenceError
-    let bar = 2;
+        console.log(bar); // 报错ReferenceError
+        let bar = 2;          
 
 暂时性死区
 
@@ -110,7 +109,7 @@ for循环计数器
             }
             console.log(a); //1
           }
-  注意：使用以下方法在控制台测试的时候，第一次会得到正确结果，第二次如果还在控制台中下面测试的话，会出现报错。因为相当于在全局里定义了两次a 
+  注意：使用以下方法在控制台测试的时候，第一次会得到正确结果，第二次如果还在控制台中下面测试的话，会出现报错。因为相当于在全局里定义了两次a ，所以做好不要在控制台里输入
           const a = 1
           if (true) {
             const a = 3
@@ -289,7 +288,7 @@ codePointAt() / String.fromCodePoint()
       // "o"
       // "o
 
-at() 
+at()
 
 - 可以识别Unicode编号大于0xFFFF的字符，返回正确的字符（charAt()不行）
 
@@ -406,6 +405,7 @@ s修饰符：dotAll模式
 - “后行断言”的实现，需要先匹配/(?<=y)x/的x，然后再回到左边，匹配y的部分。这种“先右后左”的执行顺序，与所有其他正则操作相反，导致了一些不符合预期的行为。 
       /(?<=(\d+)(\d+))$/.exec('1053') // ["", "1", "053"]
       /^(\d+)(\d+)$/.exec('1053') // ["1053", "105", "3"]
+      
 - 上面代码中，需要捕捉两个组匹配。没有“后行断言”时，第一个括号是贪婪模式，第二个括号只能捕获一个字符，所以结果是105和3。而“后行断言”时，由于执行顺序是从右到左，第二个括号是贪婪模式，第一个括号只能捕获一个字符，所以结果是1和053。 
 
 具名组匹配
@@ -427,6 +427,11 @@ s修饰符：dotAll模式
       
       '2015-01-02'.replace(re, '$<day>/$<month>/$<year>')  //第二个参数为字符串
       // '02/01/2015'
+      
+      
+      var matches = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/u.exec('2018-12-09')
+      matches  //是一个数组，前4项即为匹配的项，后面还有一些其他的项
+      matches.groups //  {day:"09",month:"12",year:"2018"}
 - 引用：
   - 如果要在正则表达式内部引用某个“具名组匹配”，可以使用\k<组名>的写法。 
   - 数字引用（\1）依然有效。 
@@ -458,7 +463,7 @@ String.prototype.matchAll
 
 - 从 ES5 开始，在严格模式之中，八进制就不再允许使用前缀0表示，ES6 进一步明确，要使用前缀0o表示。 
 
- Number.isFinite()和Number.isNaN() 
+Number.isFinite()和Number.isNaN()
 
 - Number.isFinite()用来检查一个数值是否为有限的（finite），即不是Infinity。 
 - Number.isNaN()用来检查一个值是否为NaN。
@@ -508,6 +513,7 @@ Math.trunc()
   - 如果设置了默认值的参数不是尾参数，那么length属性也不再计入后面的参数了。
         (function (a = 0, b, c) {}).length // 0
         (function (a, b = 1, c) {}).length // 1 
+        
 - 作用域
   - 一旦设置了参数的默认值，函数进行声明初始化时，参数会形成一个单独的作用域（context）。等到初始化结束，这个作用域就会消失。这种语法行为，在不设置参数默认值时，是不会出现的 
         var x = 1;
@@ -520,6 +526,7 @@ Math.trunc()
         foo() // 3
         x // 1
         
+        
     上面代码中，函数foo的参数形成一个单独作用域。这个作用域里面，首先声明了变量x，然后声明了变量y，y的默认值是一个匿名函数。这个匿名函数内部的变量x，指向同一个作用域的第一个参数x。函数foo内部又声明了一个内部变量x，该变量与第一个参数x由于不是同一个作用域，所以不是同一个变量，因此执行y后，内部变量x和外部全局变量x的值都没变。
     如果将var x = 3的var去除，函数foo的内部变量x就指向第一个参数x，与匿名函数内部的x是一致的，所以最后输出的就是2，而外层的全局变量x依然不受影响
         var x = 1;
@@ -531,6 +538,7 @@ Math.trunc()
         
         foo() // 2
         x // 1
+        
 
 rest参数
 
@@ -542,6 +550,7 @@ rest参数
 - 注意，rest 参数之后不能再有其他参数（即只能是最后一个参数），否则会报错 
 - 函数的length属性，不包括 rest 参数。 
       (function(a, ...b) {}).length  // 1
+      
 
 严格模式
 
@@ -575,7 +584,7 @@ name属性
   - 不可以使用yield命令，因此箭头函数不能用作 Generator 函数。 
   - function------ this
   - this指向的固定化，并不是因为箭头函数内部有绑定this的机制，实际原因是箭头函数根本没有自己的this，导致内部的this就是外层代码块的this。正是因为它没有this，所以也就不能用作构造函数 
-    - this对象的指向是可变的，但是在箭头函数中，它是固定的。 
+    - this对象的指向是可变的，但是在箭头函数中，this是固定的。 
     - 箭头函数可以让setTimeout里面的this，绑定定义时所在的作用域，而不是指向运行时所在的作用域 
     - 除了this，以下三个变量在箭头函数之中也是不存在的，指向外层函数的对应变量：arguments、super、new.target。 
 
@@ -588,7 +597,6 @@ name属性
       let log = ::console.log;
       // 等同于
       var log = console.log.bind(console); 
-      
 - 如果双冒号运算符的运算结果，还是一个对象，就可以采用链式写法。 
 
 尾调用优化
@@ -718,6 +726,7 @@ Array.of()
 
 - 在当前数组内部，将指定位置的成员复制到其他位置（会覆盖原有成员），然后返回当前数组。 
       Array.prototype.copyWithin(target, start = 0, end = this.length)
+      
   - target（必需）：从该位置开始替换数据。如果为负值，表示倒数。
   - start（可选）：从该位置开始读取数据，默认为 0。如果为负值，表示倒数。
   - end（可选）：到该位置前停止读取数据，默认等于数组长度。如果为负值，表示倒数。
@@ -747,11 +756,13 @@ findIndex()
 - 可以接受第二个和第三个参数，用于指定填充的起始位置和结束位置。（在结束位置之前）
       ['a', 'b', 'c'].fill(7, 1, 2)
       // ['a', 7, 'c']    注意是在结束位置2之前！！
+      
 - 注意，如果填充的类型为对象，那么被赋值的是同一个内存地址的对象，而不是深拷贝对象。 
       let arr = new Array(3).fill([]);
       arr[0].push(5);
       arr
       // [[5], [5], [5]]
+      
 
 数组实例的entries(),keys(),values()
 
@@ -761,6 +772,7 @@ findIndex()
       }
       // 0 "a"
       // 1 "b"
+      
 
 数组实例的includes()
 
@@ -777,7 +789,7 @@ findIndex()
 - 数组的空位指，数组的某一个位置没有任何值 
 - **注意，空位不是undefined，一个位置的值等于undefined，依然是有值的。
 - es5
-  -  forEach(), filter(), reduce(), every() 和some()都会跳过空位。
+  - forEach(), filter(), reduce(), every() 和some()都会跳过空位。
   - map()会跳过空位，但会保留这个值
   - join()和toString()会将空位视为undefined，而undefined和null会被处理成空字符串。
 - ES6 则是明确将空位转为undefined。 
@@ -786,9 +798,9 @@ findIndex()
 
 对象的扩展
 
- 属性的简洁表示法
+属性的简洁表示法
 
-ES6 允许直接写入变量和函数，作为对象的属性和方法 
+ES6 允许直接写入变量和函数，作为对象的属性和方法
 
 - 属性简写（属性名即为变量名）
 
@@ -823,9 +835,10 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
       var obj = {
         'class': function() {}
       };
+      
 - 如果某个方法的值是一个 Generator 函数，前面需要加上星号 
 
- 属性名表达式
+属性名表达式
 
 - ES6 允许字面量定义对象时，用中括号包含（表达式）作为对象的属性名或者方法名，即把表达式放在方括号内。 
       let lastWord = 'last word';
@@ -850,7 +863,7 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
   - 属性名表达式如果是一个对象，默认情况下会自动将对象转为字符串[object Object] 
   - 若有相同的属性名，则后面的属性名会覆盖前面的（前面的无效）
 
- 方法的name属性
+方法的name属性
 
 - 方法的name属性返回函数名（即方法名） 
 - 如果对象的方法使用了取值函数（getter）和存值函数（setter） ，返回值是方法名前加上get和set。 
@@ -858,12 +871,12 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
 - function构造函数创造的函数，name属性返回anonymous。 
 - 如果对象的方法是一个 Symbol 值，那么name属性返回的是这个 Symbol 值的描述。 
 
- Object.is()
+Object.is()
 
 - Object.is()用来比较两个值是否严格相等，与严格比较运算符（===）的行为基本一致。 
   - 不同之处只有两个：一是+0不等于-0，二是NaN等于自身。 
 
- Object.assign()
+Object.assign()
 
 - Object.assign方法用于对象的合并，将源对象（source）的所有可枚举属性，复制到目标对象（target） 
 - 如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性。 
@@ -875,7 +888,7 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
   - 数组的处理：把数组视为对象，索引即为属性名
   - 取值函数的处理：如果要赋值的是一个取值函数，那么将求值后再赋值
 
- 属性的可枚举性和遍历
+属性的可枚举性和遍历
 
 - 对象的每个属性都有一个描述对象（Descriptor），用来控制该属性的行为 
 - Object.getOwnPropertyDescriptor方法可以获取该属性的描述对象。 
@@ -890,12 +903,12 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
   - 其次遍历所有字符串键，按照加入时间升序排列。
   - 最后遍历所有 Symbol 键，按照加入时间升序排列
 
- Object.getOwnPropertyDescriptors()
+Object.getOwnPropertyDescriptors()
 
 - ES2017 引入了Object.getOwnPropertyDescriptors方法，返回指定对象所有自身属性（非继承属性）的描述对象。 
 - 目的：该方法的引入目的，主要是为了解决Object.assign()无法正确拷贝get属性和set属性的问题。 
 
- __proto__属性，Object.setPrototypeOf(),Object.getPrototypeOf()
+__proto__属性，Object.setPrototypeOf(),Object.getPrototypeOf()
 
 - 最好不要使用__proto__属性
 - Object.create()（生成操作）代替。 
@@ -904,7 +917,7 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
 - 如果参数不是对象，会被自动转为对象 
 - 如果参数是undefined或null，它们无法转为对象，所以会报错。 
 
- super关键字
+super关键字
 
 - ES6 新增了一个类似this的关键字super，指向当前对象的原型对象。 
 - super关键字表示原型对象时，只能用在对象的方法之中，用在其他地方都会报错。 
@@ -915,8 +928,9 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
           super.foo();
         }
       }
+      
 
- Object.keys()/values()/entries()
+Object.keys()/values()/entries()
 
 - Object.keys方法，返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名 
 - Object.values方法返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值。 
@@ -924,7 +938,7 @@ ES6 允许直接写入变量和函数，作为对象的属性和方法
   - 如果Object.values方法的参数是一个字符串，会返回各个字符组成的一个数组。 
   - 如果原对象的属性名是一个 Symbol 值，该属性会被忽略。 
 
- 对象的扩展运算符
+对象的扩展运算符
 
 - ES2018 将这个运算符(...)了对象。 
 
@@ -1027,6 +1041,7 @@ WeakSet
         const a = [[1, 2], [3, 4]];
         const ws = new WeakSet(a);
         // WeakSet {[1, 2], [3, 4]}    是数组a的成员成为ws的成员，而不是a数组本身
+        
   - WeakSet.prototype.add(value)：向 WeakSet 实例添加一个新成员。
   - WeakSet.prototype.delete(value)：清除 WeakSet 实例的指定成员。
   - WeakSet.prototype.has(value)：返回一个布尔值，表示某个值是否在 WeakSet 实例之中。
@@ -1038,10 +1053,265 @@ Map
 基本用法
 
 - ES6 提供了 Map 数据结构。它类似于对象，也是键值对的集合，但是“键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键 
+- 如果对同一个键多次赋值，后面的值将覆盖前面的值。 
+  - 注意，只有对同一个对象的引用，Map 结构才将其视为同一个键。 
+- 如果 Map 的键是一个简单类型的值（数字、字符串、布尔值），则只要两个值严格相等，Map 将其视为一个键 
+
+实力属性和操作方法
+
+- size属性返回Map结构的成员总数
+- 操作方法
+  - set(key, value)  设置键值对返回整个Map结构 （注意中间是逗号），因为左后返回的是map对象，所以可以采用链式写法
+  - get(key)   读取键值，如果找不到返回undefined
+  - has(key)
+  - delete(key) 删除键，返回布尔值
+  - clear()，无返回值
+- 遍历方法-------------------Map 的遍历顺序就是插入顺序 
+  - keys()：返回键名的遍历器。
+  - values()：返回键值的遍历器。
+  - entries()：返回所有成员的遍历器。-------------->为默认方法
+  - forEach()：遍历 Map 的所有成员。
+- Map 结构转为数组结构，比较快速的方法是使用扩展运算符（...）。 
+
+与其他数据结构的转换
+
+- Map转换成数组----------->  扩展运算符
+- 数组转Map ----------------->直接将数组传入Map构造函数-------new Map(array)
+- Map转对象------------------> 如果键只有字符串可以直接转换、如果不是，则键名会被转成字符串
+- 对象转Map-------------->遍历一遍直接转换
+- Map转JSON ---------------->都是字符串的时候转为对象JSON，否则转为数组JSON
 
 WeakMap
 
+- 与Map的区别
+  - WeakMap只接受对象作为键名（null除外），不接受其他类型的值作为键名 
+  - WeakMap 就是为了解决这个问题而诞生的，它的键名所引用的对象都是弱引用，即垃圾回收机制不将该引用考虑在内 
+    - 只要所引用的对象的其他引用都被清除，垃圾回收机制就会释放该对象所占用的内存。 
+- 回收机制
+- 用途：WeakMap 应用的典型场合就是 DOM 节点作为键名 
+- WeakMap 的另一个用处是部署私有属性。 
 
 
+
+Proxy
+
+概述
+
+- Proxy（代理器） 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。 
+
+- ES6 原生提供 Proxy 构造函数，用来生成 Proxy 实例。 
+      var proxy = new Proxy(target, handler);
+- Proxy 支持的拦截操作 
+  - get(target, propKey, receiver)：拦截对象属性的读取，比如proxy.foo和proxy['foo']。
+    - 第三个参数可选----->它总是指向原始的读操作所在的那个对象，一般情况下就是 Proxy 实例。 
+    - get方法可以继承
+    - 链式调用
+          var pipe = (function () {
+            return function (value) {
+              var funcStack = [];
+              var oproxy = new Proxy({} , {
+                get : function (pipeObject, fnName) {
+                  if (fnName === 'get') {
+                    return funcStack.reduce(function (val, fn) {
+                      return fn(val);  //用ruduce方法挨个调用数组中的函数
+                    },value);
+                  }
+                  funcStack.push(window[fnName]);  //将之前调用的方法放到一个数组中
+                  return oproxy;
+                }
+              });
+          
+              return oproxy;
+            }
+          }());
+          
+          var double = n => n * 2;
+          var pow    = n => n * n;
+          var reverseInt = n => n.toString().split("").reverse().join("") | 0;
+          
+          pipe(3).double.pow.reverseInt.get; // 63
+    - 实现生成各种DOM节点的通用函数dom
+          const dom = new Proxy({}, {
+            get(target, property) {
+              return function(attrs = {}, ...children) {
+                const el = document.createElement(property);
+                for (let prop of Object.keys(attrs)) {
+                  el.setAttribute(prop, attrs[prop]);
+                }
+                for (let child of children) {
+                  if (typeof child === 'string') {
+                    child = document.createTextNode(child);
+                  }
+                  el.appendChild(child);
+                }
+                return el;
+              }
+            }
+          });
+          
+          const el = dom.div({},
+            'Hello, my name is ',
+            dom.a({href: '//example.com'}, 'Mark'),
+            '. I like:',
+            dom.ul({},
+              dom.li({}, 'The web'),
+              dom.li({}, 'Food'),
+              dom.li({}, '…actually that\'s it')
+            )
+          );
+          
+          document.body.appendChild(el);
+  - set(target, propKey, value, receiver)：拦截对象属性的设置，比如proxy.foo = v或proxy['foo'] = v，返回一个布尔值。
+    - set方法的第四个参数receiver，指的是原始的操作行为所在的那个对象 
+          const handler = {
+            set: function(obj, prop, value, receiver) {
+              obj[prop] = receiver;
+            }
+          };
+          const proxy = new Proxy({}, handler);
+          const myObj = {};
+          Object.setPrototypeOf(myObj, proxy);
+          
+          myObj.foo = 'bar';
+          myObj.foo === myObj // true
+  - has(target, propKey)：拦截propKey in proxy的操作，返回一个布尔值。
+    - has方法拦截的是HasProperty操作，而不是HasOwnProperty操作，即has方法不判断一个属性是对象自身的属性，还是继承的属性。 
+    - 虽然for...in循环也用到了in运算符，但是has拦截对for...in循环不生效。 
+  - deleteProperty(target, propKey)：拦截delete proxy[propKey]的操作，返回一个布尔值。
+    - 如果这个方法抛出错误或者返回false，当前属性就无法被delete命令删除。 
+  - ownKeys(target)：拦截Object.getOwnPropertyNames(proxy)、Object.getOwnPropertySymbols(proxy)、Object.keys(proxy)、for...in循环，返回一个数组。该方法返回目标对象所有自身的属性的属性名，而Object.keys()的返回结果仅包括目标对象自身的可遍历属性。
+    - 有三类属性会被ownKeys方法自动过滤，不会返回。 
+      - 目标对象上不存在的属性
+      - 属性名为 Symbol 值
+      - 不可遍历（enumerable）的属性
+  - getOwnPropertyDescriptor(target, propKey)：拦截Object.getOwnPropertyDescriptor(proxy, propKey)，返回属性的描述对象。
+  - defineProperty(target, propKey, propDesc)：拦截Object.defineProperty(proxy, propKey, propDesc）、Object.defineProperties(proxy, propDescs)，返回一个布尔值。
+  - preventExtensions(target)：拦截Object.preventExtensions(proxy)，返回一个布尔值。
+  - getPrototypeOf(target)：拦截Object.getPrototypeOf(proxy)，返回一个对象。
+  - isExtensible(target)：拦截Object.isExtensible(proxy)，返回一个布尔值。
+  - setPrototypeOf(target, proto)：拦截Object.setPrototypeOf(proxy, proto)，返回一个布尔值。如果目标对象是函数，那么还有两种额外操作可以拦截。
+  - apply(target, object, args)：拦截 Proxy 实例作为函数调用的操作，比如proxy(...args)、proxy.call(object, ...args)、proxy.apply(...)。
+    - apply方法拦截函数的调用、call和apply操作。 
+  - construct(target, args)：拦截 Proxy 实例作为构造函数调用的操作，比如new proxy(...args)。
+    - construct方法返回的必须是一个对象，否则会报错 
+
+Proxy.revocable()
+
+- Proxy.revocable方法返回一个可取消的 Proxy 实例。 
+- Proxy.revocable的一个使用场景是，目标对象不允许直接访问，必须通过代理访问，一旦访问结束，就收回代理权，不允许再次访问。 
+
+this问题
+
+- 虽然 Proxy 可以代理针对目标对象的访问，但它不是目标对象的透明代理，即不做任何拦截的情况下，也无法保证与目标对象的行为一致。主要原因就是在 Proxy 代理的情况下，目标对象内部的this关键字会指向 Proxy 代理。 
+
+实例：Web服务的客户端
+
+- Proxy 对象可以拦截目标对象的任意属性，这使得它很合适用来写 Web 服务的客户端。 
+
+
+
+Reflect
+
+概述
+
+- 设计目的
+  - 将Object对象的一些明显属于语言内部的方法（比如Object.defineProperty），放到Reflect对象上 -------------->更加清晰
+  - 修改某些Object方法的返回结果，让其变得更合理 
+  - 让Object操作都变成函数行为 ---------->命令式变为函数行为
+  - Reflect对象的方法与Proxy对象的方法一一对应，只要是Proxy对象的方法，就能在Reflect对象上找到对应的方法。------->也就是说，不管Proxy怎么修改默认行为，你总可以在Reflect上获取默认行为。 
+
+静态方法
+
+- Reflect.apply(target, thisArg, args)
+- Reflect.construct(target, args)
+- Reflect.get(target, name, receiver)
+  - Reflect.get方法查找并返回target对象的name属性，如果没有该属性，则返回undefined。 
+  - 如果第一个参数不是对象，Reflect.get方法会报错   
+  - 如果name属性部署了读取函数（getter），则读取函数的this绑定receiver。 
+- Reflect.set(target, name, value, receiver)
+  - Reflect.set方法设置target对象的name属性等于value。 
+  - 如果name属性设置了赋值函数，则赋值函数的this绑定receiver。 
+  - 它返回一个布尔值，表示是否设置成功 
+- Reflect.defineProperty(target, name, desc)
+- Reflect.deleteProperty(target, name)
+- Reflect.has(target, name)
+- Reflect.ownKeys(target)
+- Reflect.isExtensible(target)
+- Reflect.preventExtensions(target)
+- Reflect.getOwnPropertyDescriptor(target, name)
+- Reflect.getPrototypeOf(target)
+- Reflect.setPrototypeOf(target, prototype)
+
+观察者模式
+
+- 观察者模式（Observer mode）指的是函数自动观察数据对象，一旦对象有变化，函数就会自动执行。
+-     const queuedObservers = new Set();
+      
+      const observe = fn => queuedObservers.add(fn); //将观察者都放入一个目标当中
+      const observable = obj => new Proxy(obj, {set});  //使用Proxy代理来拦截赋值操作，触发充当观察者的各个函数
+      
+      function set(target, key, value, receiver) {
+        const result = Reflect.set(target, key, value, receiver); //赋值操作
+        queuedObservers.forEach(observer => observer());  // 触发各个函数执行
+        return result;
+      }
+
+
+
+Promise对象
+
+Promise的含义
+
+- Promise 是异步编程的一种解决方案 
+- 所谓Promise，简单说就是一个容器，里面保存着某个未来才会结束的事件（通常是一个异步操作）的结果 
+- 特点：
+  - 对象的状态不受外界影响 
+    - Promise对象代表一个异步操作，有三种状态：pending（进行中）、fulfilled（已成功）和rejected（已失败）
+    - 只有异步操作的结果，可以决定当前是哪一种状态，任何其他操作都无法改变这个状态。  
+  - 一旦状态改变，就不会再变，任何时候都可以得到这个结果 
+    - Promise对象的状态改变，只有两种可能：从pending变为fulfilled和从pending变为rejected 
+    - 与事件（Event）完全不同，事件的特点是，如果你错过了它，再去监听，是得不到结果的。 
+- 缺点:
+  - 无法取消Promise，一旦新建它就会立即执行，无法中途取消。 
+  - 如果不设置回调函数，Promise内部抛出的错误，不会反应到外部 
+  - 当处于pending状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成） 
+
+ 基本用法
+
+- ES6规定，Promise对象是一个构造函数，用来生成Promise实例
+- Promise构造函数接受一个函数作为参数，该函数的两个参数分别是resolve和reject。它们是两个函数，由 JavaScript 引擎提供，不用自己部署。
+  -  resolve函数的作用是，将Promise对象的状态从“未完成”变为“成功”（即从 pending 变为 resolved），在异步操作成功时调用，并将异步操作的结果，作为参数传递出去 
+  - reject函数的作用是，将Promise对象的状态从“未完成”变为“失败”（即从 pending 变为 rejected），在异步操作失败时调用，并将异步操作报出的错误，作为参数传递出去。 
+- Promise实例生成以后，可以用then方法分别指定resolved状态和rejected状态的回调函数。 
+  - then方法可以接受两个回调函数作为参数 
+    - 第一个回调函数是Promise对象的状态变为resolved时调用 
+    - 第二个回调函数是Promise对象的状态变为rejected时调用 
+    - 两个函数都接受Promise对象传出的值作为参数 
+  - Promise 新建后立即执行，then方法指定的回调函数，将在当前脚本所有同步任务执行完才会执行 
+  - Promise实例2里resolve(实例1)时，实例1的状态决定了实例2的状态，实例2自己的状态失效
+  - 调用resolve或reject并不会终结 Promise 的参数函数的执行。 后面的语句仍然可以执行，但是这样做不是很好，因此最好加个return
+  - 
+
+ Promise.prototype.then()
+
+- 作用是为 Promise 实例添加     状态改变时    的回调函数 
+- then方法返回的是一个新的Promise实例（注意，不是原来那个Promise实例）。可以采用链式写法 
+- 
+
+ Promise.protype.catch()
+
+ Promise.prototype.finally()
+
+ Promise.all()
+
+ Promise.race()
+
+ Promise.resolve()
+
+ Promise.reject()
+
+ 应用
+
+Promise.try() 
 
 
